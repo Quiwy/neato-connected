@@ -3,12 +3,12 @@ type: vertical-stack
 variables:
   NOTE: >
     Combatability between esphome config and this card is ensured as long as the
-    major version's match, for relase candicates, betas etc (indicated by
+    minor version's match, for relase candicates, betas etc (indicated by
     X.X-a/b/rc.X), the version has to match perfectly otherwise compatability is
     not promised. Please try to keep the versions the same, and check the github
     for updates!
   project: philip2809.neato-connected
-  version: "1.1.1"
+  version: "1.2-b.1"
 cards:
   - type: custom:button-card
     variables:

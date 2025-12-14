@@ -24,13 +24,13 @@ esphome:
 
 
 #   Combatability between esphome config and this card is ensured as long as the
-#   major version's match, for relase candicates, betas etc (indicated by X.X-a/b/rc.X), the version
+#   minor version's match, for relase candicates, betas etc (indicated by X.X-a/b/rc.X), the version
 #   has to match perfectly otherwise compatability is not promised. 
 #
 #   Please try to keep the versions the same, and check the github for updates!
   project: 
     name: philip2809.neato-connected
-    version: "1.1.1"
+    version: "1.2-b.1"
 
   on_boot:
     - priority: 600
@@ -54,6 +54,7 @@ esphome:
             }
 
             id(last_cleaning_duration).publish_state(id(g_last_cleaning_duration));
+
 
 script:
   - id: get_user_settings
@@ -113,6 +114,20 @@ script:
               id(g_last_cleaning_duration) = duration_min;
               id(last_cleaning_duration).publish_state(duration_min);
           }
+  - id: play_extra_sounds
+    parameters:
+      soundid: int
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(g_play_extra_sounds);
+          then:
+            - uart.write: !lambda |-
+                std::string s =
+                  "PlaySound SoundId " + std::to_string(soundid) + "\n";
+                return std::vector<uint8_t>(s.begin(), s.end());
+
 
 
 globals:
@@ -133,7 +148,11 @@ globals:
   - id: g_last_cleaning_duration           # 4 BYTES
     type: uint32_t
     restore_value: yes
-  # --- TOTAL BYTES USED: 16 BYTES ---
+
+  - id: g_play_extra_sounds                # 1 BYTE
+    type: bool
+    restore_value: yes
+  # --- TOTAL BYTES USED: 17 BYTES ---
 
 
 interval:
@@ -165,6 +184,14 @@ api:
             // convert string → vector<uint8_t>
             return std::vector<uint8_t>(s.begin(), s.end());
 
+    - action: clear_alert
+      variables:
+        alert: string
+      then:
+        - uart.write: !lambda |-
+            std::string cmd = std::string("SetUIError clearalert ") + alert + "\n";
+            return std::vector<uint8_t>(cmd.begin(), cmd.end());
+
     - action: play_sound
       variables:
         soundid: int
@@ -174,6 +201,7 @@ api:
             std::string s = "PlaySound SoundId " + std::to_string(soundid) + "\n";
             // convert string → vector<uint8_t>
             return std::vector<uint8_t>(s.begin(), s.end());
+
 
 ota:
   - platform: esphome
@@ -711,6 +739,17 @@ switch:
     entity_category: "diagnostic"
 
   - platform: template
+    name: "Play Extra Sounds"
+    optimistic: true
+    id: switch_play_extra_sounds
+    turn_on_action:
+      - lambda: 'id(g_play_extra_sounds) = true;'
+    turn_off_action:
+      - lambda: 'id(g_play_extra_sounds) = false;'
+    entity_category: "diagnostic"
+
+  # --- SetUserSettings ---
+  - platform: template
     name: "Click sounds"
     optimistic: true
     id: clickSounds
@@ -879,12 +918,18 @@ button:
     name: "House Clean"
     icon: mdi:home
     on_press:
+      - script.execute:
+          id: play_extra_sounds
+          soundid: 1
       - uart.write: "Clean \n"
 
   - platform: template
     name: "Spot Clean"
     icon: mdi:target
     on_press:
+      - script.execute:
+          id: play_extra_sounds
+          soundid: 1
       - uart.write: "Clean Spot \n"
 
   - platform: template
@@ -898,6 +943,7 @@ button:
             int h = (int) id(spot_height).state;
 
             std::string cmd = "Clean Spot Width " + std::to_string(w) + " Height " + std::to_string(h) + "\n";
+            id(play_extra_sounds)->execute(1);
             return std::vector<uint8_t>(cmd.begin(), cmd.end());
 
   - platform: template
@@ -921,6 +967,12 @@ button:
       - uart.write: "SetUIError clearalert UI_ALERT_OLD_ERROR \n"
 
   - platform: template
+    name: "Clear All Alerts & Errors"
+    icon: mdi:notification-clear-all
+    on_press:
+      - uart.write: "SetUIError clearall \n"
+
+  - platform: template
     name: "Resume Cleaning"
     icon: mdi:play
     on_press:
@@ -932,6 +984,7 @@ button:
             if (state == "UIMGR_STATE_SPOTCLEANINGPAUSED") cmd += " Spot";
 
             cmd += " \n";
+            id(play_extra_sounds)->execute(1);
             return std::vector<uint8_t>(cmd.begin(), cmd.end());
 
   - platform: template
