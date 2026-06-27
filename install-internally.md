@@ -9,7 +9,7 @@ The pictures here are from a D5 but should be similar for others. Please read th
 - Long T10 Torx bit + bit holder
 - Philips screwdriver
 - The ESP you flashed
-- [One male JST-XH cable](https://www.amazon.com/dp/B0D9R3MP4G?ref=cm_sw_r_cso_cp_apan_dp_N8757APDHEV6D087T3VR&ref_=cm_sw_r_cso_cp_apan_dp_N8757APDHEV6D087T3VR&social_share=cm_sw_r_cso_cp_apan_dp_N8757APDHEV6D087T3VR&titleSource=true)
+- [One female JST-XH cable](https://www.amazon.com/dp/B0D9R3MP4G?ref=cm_sw_r_cso_cp_apan_dp_N8757APDHEV6D087T3VR&ref_=cm_sw_r_cso_cp_apan_dp_N8757APDHEV6D087T3VR&social_share=cm_sw_r_cso_cp_apan_dp_N8757APDHEV6D087T3VR&titleSource=true)
 - A soldering iron
 - 4 pieces of about 10 cm of wire
 - 4 pieces of heath shrink tubing
